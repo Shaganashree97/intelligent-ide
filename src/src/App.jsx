@@ -3,9 +3,9 @@ import MonacoEditor from "./components/MonacoEditor";
 import LanguageSelector from "./components/LanguageSelector";
 import "./App.css";
 import { Editor } from "@monaco-editor/react";
-import DebugPanel from "./components/DebugPanel ";
+import DebugPanel from "./components/DebugPanel";
 import * as monaco from "monaco-editor";
-import { debugWithAI } from "./utils/aiHelper";
+import { debugWithAI, extractCodeFromResponse } from "./utils/aiHelper";
 import AIChatSidebar from "./components/AIChatSidebar";
 
 const App = () => {
@@ -35,7 +35,6 @@ const App = () => {
   const updateEditorContent = (newContent) => {
     setEditorContent(newContent);
 
-    // Update the editor if reference exists
     if (editorRef.current) {
       editorRef.current.setValue(newContent);
     }
@@ -49,7 +48,6 @@ const App = () => {
   function handleEditorDidMount(editor, monaco) {
     editorRef.current = editor;
 
-    // Add gutter for breakpoints
     editor.onMouseDown((e) => {
       if (e.target.type === monaco.editor.MouseTargetType.GUTTER_LINE_NUMBERS) {
         toggleBreakpoint(e.target.position.lineNumber);
@@ -58,15 +56,12 @@ const App = () => {
   }
 
   const toggleBreakpoint = (lineNumber) => {
-    // Check if breakpoint already exists
     const breakpointExists = breakpoints.includes(lineNumber);
     let newBreakpoints;
 
     if (breakpointExists) {
-      // Remove breakpoint
       newBreakpoints = breakpoints.filter((bp) => bp !== lineNumber);
     } else {
-      // Add breakpoint
       newBreakpoints = [...breakpoints, lineNumber];
     }
 
@@ -97,7 +92,6 @@ const App = () => {
     setDebugOutput("Debugging started...\n");
     setCurrentLine(1);
 
-    // Parse code to find variables (simplified for demo)
     const lines = editorContent.split("\n");
     let extractedVars = [];
 
@@ -114,7 +108,6 @@ const App = () => {
 
     setVariables(extractedVars);
 
-    // Highlight first line or first breakpoint
     highlightCurrentLine(breakpoints.length > 0 ? breakpoints[0] : 1);
   };
 
@@ -156,10 +149,7 @@ const App = () => {
   };
 
   const evaluateExpression = (expr) => {
-    // This is a simplified implementation
-    // In a real-world scenario, you would use a proper parser and evaluator
     try {
-      // Simple but unsafe - only for demonstration
       return expr.trim();
     } catch (e) {
       return "undefined";
@@ -170,7 +160,6 @@ const App = () => {
     setCurrentLine(lineNumber);
 
     if (editorRef.current) {
-      // Highlight current execution line
       editorRef.current.revealLineInCenter(lineNumber);
 
       const decorations = [
@@ -283,11 +272,10 @@ const App = () => {
                 scrollBeyondLastLine: false,
                 wordWrap: "on",
                 lineNumbers: "on",
-                glyphMargin: true, // Required for breakpoints
+                glyphMargin: true,
               }}
             />
 
-            {/* Add AI Chat Sidebar */}
             <AIChatSidebar
               editorContent={editorContent}
               selectedLanguage={selectedLanguage}
@@ -296,40 +284,41 @@ const App = () => {
             />
           </div>
 
-          {/* Error display section */}
-          {errors.length > 0 && (
-            <div className="error-panel">
-              <h3>Issues in your code:</h3>
+          <div className="error-panel h-[50%]">
+            {errors.length > 0 && (
+              <>
+                <h3>Issues in your code:</h3>
 
-              <ul>
-                {errors.map((error, index) => (
-                  <div key={index}>
-                    <li className="error-item">
-                      <span className="error-location">
-                        Line {error.startLineNumber}, Column {error.startColumn}
-                        :{" "}
-                      </span>
-                      <span className="error-message">{error.message}</span>
-                    </li>
-                    <button
-                      onClick={async () => {
-                        const res = await debugWithAI(
-                          error,
-                          editorContent,
-                          selectedLanguage,
-                        );
-                        setEditorContent(res);
-                      }}
-                    >
-                      fix this error using ai
-                    </button>
-                  </div>
-                ))}
-              </ul>
-            </div>
-          )}
+                <ul>
+                  {errors.map((error, index) => (
+                    <div key={index}>
+                      <li className="error-item">
+                        <span className="error-location">
+                          Line {error.startLineNumber}, Column{" "}
+                          {error.startColumn}:{" "}
+                        </span>
+                        <span className="error-message">{error.message}</span>
+                      </li>
+                      <button
+                        onClick={async () => {
+                          const res = await debugWithAI(
+                            error,
+                            editorContent,
+                            selectedLanguage,
+                          );
+                          console.log("This is res: ", res);
+                          setEditorContent(extractCodeFromResponse(res));
+                        }}
+                      >
+                        fix this error using ai
+                      </button>
+                    </div>
+                  ))}
+                </ul>
+              </>
+            )}
+          </div>
 
-          {/* Debug panel */}
           {isDebugging && (
             <DebugPanel
               output={debugOutput}

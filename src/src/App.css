@@ -77,156 +77,157 @@ body {
 }
 
 /* Add these styles to your existing App.css */
-body {
-  margin: 0;
-  padding: 0;
-  overflow: hidden;
-}
 
-.app {
-  height: 100vh;
-  width: 100vw;
-  background-color: rgb(35, 35, 35);
-}
-
-.warning {
-  position: absolute;
-  z-index: 1;
-  width: 35%;
-  left: 50%;
-  margin-left: -17.5%;
-  top: 50%;
-  height: 10%;
-  margin-top: -5%;
-  text-align: center;
-  color: rgb(209, 209, 209);
-  font-weight: normal;
-  font-size: 17px;
-}
-
-.warning i {
-  font-size: 13px;
-}
-
-.monaco-editor {
-  height: 100%;
-  width: 100vw !important;
-}
-
-.more-opt {
-  width: 100%;
-  padding-left: 4%;
-  padding-right: 4%;
-  height: auto;
-  background-color: rgb(35, 35, 35);
-}
-
-.more-opt select,
-.more-opt button {
-  background-color: rgb(39, 39, 39);
-  color: rgb(209, 209, 209);
-  font-size: 11px;
-  margin-left: 20px;
-  border: 0;
-  padding: 8px 20px;
+.error-panel {
+  background-color: #2d2d2d;
+  border-top: 1px solid #444;
+  color: #e0e0e0;
+  padding: 10px 15px;
   margin-top: 5px;
-  margin-bottom: 5px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
-.more-opt select {
-  outline: 0;
+.error-panel h3 {
+  color: #f08080;
+  margin-top: 0;
+  font-size: 16px;
 }
 
-.more-opt option {
-  padding: 5px 0;
-  border: 0;
-  outline: 0;
-}
-
-.more-opt option:hover {
-  color: rgb(35, 35, 35);
-  background-color: #f3f3f3;
-}
-
-.main-content {
-  height: calc(100vh - 50px);
-}
-.file-explorer {
-  border-right: 1px solid #ddd;
-}
-
-/* Add these styles to your existing App.css */
-
-.app {
-  height: 100vh;
-  width: 100%;
+.error-item {
+  margin-bottom: 8px;
   display: flex;
   flex-direction: column;
+}
+
+.error-location {
+  color: #f08080;
+  font-weight: bold;
+}
+
+.error-message {
+  color: #ffaa99;
+}
+
+/* Debug Panel Styles */
+.debug-panel {
+  display: flex;
+  background-color: #1e1e1e;
+  border-top: 1px solid #444;
+  padding: 10px;
+  height: 200px;
   overflow: hidden;
 }
 
-.main-content {
+.debug-panel-section {
   flex: 1;
+  padding: 0 10px;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  position: relative;
-  overflow: hidden;
+}
+
+.debug-panel-section h3 {
+  margin-top: 0;
+  color: #75beff;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.variables-list {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.variable-table {
+  width: 100%;
+  border-collapse: collapse;
+  color: #d4d4d4;
+  font-size: 12px;
+}
+
+.variable-table th, 
+.variable-table td {
+  padding: 4px 8px;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+.variable-table th {
+  color: #75beff;
+  font-weight: normal;
+}
+
+.current-variable {
+  background-color: rgba(86, 156, 214, 0.2);
+}
+
+.debug-output {
+  font-family: monospace;
+  font-size: 12px;
+  margin: 0;
+  padding: 5px;
+  background-color: #252526;
+  color: #d4d4d4;
+  overflow-y: auto;
+  height: 100%;
+  border-radius: 3px;
 }
 
 .toolbar {
-  padding: 8px;
-  background-color: #252526;
-  border-bottom: 1px solid #1e1e1e;
+  display: flex;
+  padding: 5px 0;
+  margin-bottom: 5px;
+}
+
+.debug-button,
+.step-button {
+  padding: 6px 12px;
+  margin-right: 10px;
+  background-color: #0e639c;
+  color: white;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.debug-button:hover,
+.step-button:hover {
+  background-color: #1177bb;
+}
+
+.debug-button.active {
+  background-color: #c73e3e;
+}
+
+.debug-button.active:hover {
+  background-color: #e04646;
 }
 
 .editor-container {
-  flex: 1;
   position: relative;
-  display: flex;
+  height: calc(100vh - 350px);
+  min-height: 300px;
 }
 
-/* Make sure Monaco editor takes appropriate space */
-.editor-container > div:first-child {
-  flex: 1;
-}
-
-/* These classes should already exist, but ensure they have these properties */
+/* Breakpoint styling */
 .breakpoint-decoration {
   background-color: rgba(255, 0, 0, 0.2);
 }
 
 .breakpoint-glyph {
-  background-color: #d44;
+  background: red;
   border-radius: 50%;
   margin-left: 5px;
 }
 
 .current-line-decoration {
-  background-color: rgba(255, 255, 0, 0.2);
+  background-color: rgba(86, 156, 214, 0.3);
 }
 
 .current-line-glyph {
-  background-color: #dd4;
+  background: rgba(86, 156, 214, 1);
   border-radius: 50%;
   margin-left: 5px;
-}
-
-.error-panel {
-  background-color: #1e1e1e;
-  border-top: 1px solid #333;
-  padding: 10px;
-  max-height: 200px;
-  overflow-y: auto;
-}
-
-.error-item {
-  margin-bottom: 8px;
-}
-
-.error-location {
-  color: #999;
-}
-
-.error-message {
-  color: #f48771;
 }
