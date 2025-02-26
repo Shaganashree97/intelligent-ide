@@ -1,0 +1,24 @@
+{
+  "name": "codeeditor",
+  "version": "0.0.1",
+  "description": "relearning electron",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run start\" \"cd src && npm run dev\""
+  },
+  "author": "leonkoech",
+  "license": "MIT",
+  "dependencies": {
+    "dialogs": "^2.0.1",
+    "electron": "^23.1.2",
+    "monaco-editor": "^0.20.0",
+    "monaco-loader": "^1.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "dotenv": "^16.4.7"
+  },
+  "keywords": []
+}
