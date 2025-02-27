@@ -7,7 +7,7 @@ NODE_ENV=development
 #### install electron dependencies using npm with [nodejs](https://nodejs.org/en)
 
 ```
-npm install
+npm install --force
 ```
 
 #### install dependencies for frontend
