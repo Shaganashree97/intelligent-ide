@@ -7,6 +7,7 @@ import DebugPanel from "./components/DebugPanel";
 import * as monaco from "monaco-editor";
 import { debugWithAI, extractCodeFromResponse } from "./utils/aiHelper";
 import AIChatSidebar from "./components/AIChatSidebar";
+import FileTree from "./components/FileTree"; // Import the new FileTree component
 
 const App = () => {
   const [selectedLanguage, setSelectedLanguage] = useState("");
@@ -20,6 +21,11 @@ const App = () => {
   const editorRef = useRef(null);
   const [breakpoints, setBreakpoints] = useState([]);
 
+  // New state for managing files
+  const [currentFile, setCurrentFile] = useState(null);
+  const [files, setFiles] = useState({});
+  const [showFileTree, setShowFileTree] = useState(true);
+
   const handleLanguageChange = (language) => {
     if (language) {
       setSelectedLanguage(language);
@@ -30,6 +36,17 @@ const App = () => {
 
   const handleEditorChange = (value) => {
     setEditorContent(value);
+
+    // Save content to current file
+    if (currentFile) {
+      setFiles((prev) => ({
+        ...prev,
+        [currentFile.id]: {
+          ...prev[currentFile.id],
+          content: value,
+        },
+      }));
+    }
   };
 
   const updateEditorContent = (newContent) => {
@@ -37,6 +54,17 @@ const App = () => {
 
     if (editorRef.current) {
       editorRef.current.setValue(newContent);
+    }
+
+    // Save to current file
+    if (currentFile) {
+      setFiles((prev) => ({
+        ...prev,
+        [currentFile.id]: {
+          ...prev[currentFile.id],
+          content: newContent,
+        },
+      }));
     }
   };
 
@@ -80,6 +108,78 @@ const App = () => {
 
       editorRef.current.deltaDecorations([], decorations);
     }
+  };
+
+  // File tree handlers
+  const handleFileSelect = (file) => {
+    if (file.type === "file") {
+      // Save current file before switching
+      if (currentFile) {
+        setFiles((prev) => ({
+          ...prev,
+          [currentFile.id]: {
+            ...prev[currentFile.id],
+            content: editorContent,
+          },
+        }));
+      }
+
+      // Load the selected file
+      setCurrentFile(file);
+
+      // Get file content from our files state or use empty string
+      const fileContent = files[file.id]?.content || file.content || "";
+      setEditorContent(fileContent);
+
+      // Set language based on file extension
+      const extension = file.name.split(".").pop().toLowerCase();
+      const languageMap = {
+        js: "javascript",
+        jsx: "javascript",
+        ts: "typescript",
+        tsx: "typescript",
+        py: "python",
+        html: "html",
+        css: "css",
+        json: "json",
+        md: "markdown",
+      };
+
+      if (languageMap[extension] && !selectedLanguage) {
+        setSelectedLanguage(languageMap[extension]);
+      }
+    }
+  };
+
+  const handleFileCreate = (file) => {
+    // Add new file to our files dictionary
+    setFiles((prev) => ({
+      ...prev,
+      [file.id]: { ...file, content: "" },
+    }));
+  };
+
+  const handleFolderCreate = (folder) => {
+    // No need to store folder content
+  };
+
+  const handleDelete = (fileIds) => {
+    // Remove files from our files dictionary
+    const newFiles = { ...files };
+    fileIds.forEach((id) => {
+      delete newFiles[id];
+    });
+    setFiles(newFiles);
+
+    // If current file was deleted, clear editor
+    if (currentFile && fileIds.includes(currentFile.id)) {
+      setCurrentFile(null);
+      setEditorContent("");
+    }
+  };
+
+  const toggleFileTree = () => {
+    setShowFileTree((prev) => !prev);
   };
 
   const startDebugging = () => {
@@ -253,35 +353,61 @@ const App = () => {
       />
       {selectedLanguage && (
         <div className="main-content">
-          <div className="toolbar">{/* Toolbar content */}</div>
+          <div className="toolbar">
+            <div className="file-info">
+              {currentFile && (
+                <span className="current-file">{currentFile.name}</span>
+              )}
+            </div>
+            <button
+              className="toggle-filetree-btn"
+              onClick={toggleFileTree}
+              title={showFileTree ? "Hide File Tree" : "Show File Tree"}
+            >
+              {showFileTree ? "← Hide Files" : "Show Files →"}
+            </button>
+          </div>
 
-          <div className="editor-container">
-            <Editor
-              language={selectedLanguage}
-              defaultValue="// let's write some broken code"
-              value={editorContent}
-              onChange={handleEditorChange}
-              onValidate={handleEditorValidation}
-              onMount={handleEditorDidMount}
-              theme="vs-dark"
-              options={{
-                minimap: { enabled: false },
-                automaticLayout: true,
-                formatOnPaste: true,
-                formatOnType: true,
-                scrollBeyondLastLine: false,
-                wordWrap: "on",
-                lineNumbers: "on",
-                glyphMargin: true,
-              }}
-            />
+          <div className="editor-with-panels">
+            {showFileTree && (
+              <div className="file-tree-panel">
+                <FileTree
+                  onFileSelect={handleFileSelect}
+                  onFileCreate={handleFileCreate}
+                  onFolderCreate={handleFolderCreate}
+                  onDelete={handleDelete}
+                />
+              </div>
+            )}
 
-            <AIChatSidebar
-              editorContent={editorContent}
-              selectedLanguage={selectedLanguage}
-              updateEditorContent={updateEditorContent}
-              aiApiCall={handleAIApiCall}
-            />
+            <div className="editor-container">
+              <Editor
+                language={selectedLanguage}
+                defaultValue="// let's write some broken code"
+                value={editorContent}
+                onChange={handleEditorChange}
+                onValidate={handleEditorValidation}
+                onMount={handleEditorDidMount}
+                theme="vs-dark"
+                options={{
+                  minimap: { enabled: false },
+                  automaticLayout: true,
+                  formatOnPaste: true,
+                  formatOnType: true,
+                  scrollBeyondLastLine: false,
+                  wordWrap: "on",
+                  lineNumbers: "on",
+                  glyphMargin: true,
+                }}
+              />
+
+              <AIChatSidebar
+                editorContent={editorContent}
+                selectedLanguage={selectedLanguage}
+                updateEditorContent={updateEditorContent}
+                aiApiCall={handleAIApiCall}
+              />
+            </div>
           </div>
 
           <div className="error-panel h-[50%]">
